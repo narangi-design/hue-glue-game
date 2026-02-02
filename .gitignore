@@ -22,3 +22,9 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Draft files
+rundev.ps1
+vite.config.js
+src/utils/test.js
+.gitignore

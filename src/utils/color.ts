@@ -1,7 +1,13 @@
 import Grid from "./grid"
-import { randomByte, lerp as lerpMath, smoothLerp as smoothLerpMath } from "./math"
+import { lerp as lerpMath } from "./math"
 import CellIndex from "./cell-index"
 import Cell from "./cell"
+import {
+    COLOR,
+    BRIGHTNESS,
+    MIN_COLOR_DISTANCE,
+    MIN_BRIGHTNESS_DIFFERENCE
+} from "../constants"
 
 class Color {
     r: number
@@ -30,6 +36,14 @@ class Color {
         )
     }
 
+    brightness(): number {
+        return 0.299 * this.r + 0.587 * this.g + 0.114 * this.b
+    }
+
+    static brightnessDifference(colorA: Color, colorB: Color): number {
+        return Math.abs(colorA.brightness() - colorB.brightness())
+    }
+
     // Linear interpolation between two colors
     static lerp(colorL: Color, colorR: Color, interpolant: number): Color {
         return new Color(
@@ -39,28 +53,40 @@ class Color {
         )
     }
 
-    // Smooth interpolation between two colors using smoothstep
-    static smoothLerp(colorL: Color, colorR: Color, interpolant: number): Color {
-        return new Color(
-            smoothLerpMath(colorL.r, colorR.r, interpolant),
-            smoothLerpMath(colorL.g, colorR.g, interpolant),
-            smoothLerpMath(colorL.b, colorR.b, interpolant)
-        )
-    }
-
     // Bilinear interpolation for smooth gradients across a 2D grid
     static bilerp(colorTL: Color, colorTR: Color, colorBL: Color, colorBR: Color, tx: number, ty: number): Color {
-        // Use smoothLerp for even smoother gradients
-        const top = Color.smoothLerp(colorTL, colorTR, tx)
-        const bottom = Color.smoothLerp(colorBL, colorBR, tx)
-        return Color.smoothLerp(top, bottom, ty)
+        const top = Color.lerp(colorTL, colorTR, tx)
+        const bottom = Color.lerp(colorBL, colorBR, tx)
+        return Color.lerp(top, bottom, ty)
     }
 
     static random(): Color {
+        const randomInRange = (min: number, max: number) => Math.floor(Math.random() * (max - min + 1)) + min
+
         return new Color(
-            randomByte(),
-            randomByte(),
-            randomByte()
+            randomInRange(COLOR.MIN, COLOR.MAX),
+            randomInRange(COLOR.MIN, COLOR.MAX),
+            randomInRange(COLOR.MIN, COLOR.MAX)
+        )
+    }
+
+    static invertBrightness(color: Color): Color {
+        const brightness = color.brightness()
+        const targetBrightness = brightness > BRIGHTNESS.THRESHOLD ? BRIGHTNESS.MIN : BRIGHTNESS.MAX
+        const factor = targetBrightness / brightness
+        return new Color(
+            Math.max(COLOR.MIN, Math.min(COLOR.MAX, color.r * factor)),
+            Math.max(COLOR.MIN, Math.min(COLOR.MAX, color.g * factor)),
+            Math.max(COLOR.MIN, Math.min(COLOR.MAX, color.b * factor))
+        )
+    }
+
+    static shiftHue(color: Color, degrees: number): Color {
+        const offset = degrees / 360 * 255
+        return new Color(
+            Math.max(COLOR.MIN, Math.min(COLOR.MAX, (color.r + offset) % 256)),
+            Math.max(COLOR.MIN, Math.min(COLOR.MAX, (color.g + offset * 0.7) % 256)),
+            Math.max(COLOR.MIN, Math.min(COLOR.MAX, (color.b + offset * 1.3) % 256))
         )
     }
 }
@@ -69,21 +95,51 @@ interface AnchorWithColor extends CellIndex {
     color?: Color
 }
 
-function makeListOfAnchorColors(anchorCount: number, minDistance: number): Color[] {
-    let colors: Color[] = [Color.random()]
-
-    while (colors.length < anchorCount) {
-        const randomColor = Color.random()
-        if (colors.every(c => Color.distance(c, randomColor) >= minDistance)) {
-            colors.push(randomColor)
+function makeListOfAnchorColors(anchorCount: number, minDistance: number, minBrightnessDiff: number): Color[] {
+    const areColorsDifferent = (colors: Color[]): boolean => {
+        for (let i = 0; i < colors.length; i++) {
+            for (let j = i + 1; j < colors.length; j++) {
+                const distance = Color.distance(colors[i], colors[j])
+                const brightnessDiff = Color.brightnessDifference(colors[i], colors[j])
+                if (distance < minDistance || brightnessDiff < minBrightnessDiff) {
+                    return false
+                }
+            }
         }
+        return true
+    }
+
+    let colors: Color[] = []
+    let attempts = 0
+
+    while (attempts < 100) {
+        const base = Color.random()
+        colors = [base]
+
+        const spacing = 360 / anchorCount
+
+        for (let i = 1; i < anchorCount; i++) {
+            colors.push(Math.random() < 0.5
+                ? Color.invertBrightness(base)
+                : Color.shiftHue(base, spacing * i))
+        }
+
+        if (areColorsDifferent(colors)) {
+            return colors
+        }
+
+        attempts++
     }
 
     return colors
 }
 
-function colorAnchors(anchors: CellIndex[], minDistance: number): AnchorWithColor[] {
-    let anchorColors = makeListOfAnchorColors(anchors.length, minDistance)
+function colorAnchors(
+    anchors: CellIndex[],
+    minDistance: number,
+    minBrightnessDiff: number
+): AnchorWithColor[] {
+    let anchorColors = makeListOfAnchorColors(anchors.length, minDistance, minBrightnessDiff)
     const anchorWithColors = anchors as AnchorWithColor[]
     for (const anchor of anchorWithColors) {
         anchor.color = anchorColors.shift()
@@ -119,7 +175,7 @@ export function generateGrid(rows: number, cols: number): Cell[][] {
 
     const grid = new Grid(rows, cols)
 
-    let coloredAnchors = colorAnchors(grid.anchors, 100)
+    let coloredAnchors = colorAnchors(grid.anchors, MIN_COLOR_DISTANCE, MIN_BRIGHTNESS_DIFFERENCE)
 
     for (const a of coloredAnchors) {
         grid.cells[a.y][a.x].color = a.color

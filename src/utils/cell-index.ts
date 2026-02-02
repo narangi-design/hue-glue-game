@@ -3,8 +3,8 @@ export default class CellIndex {
     y: number
 
     constructor(row: number, col: number) {
-        this.x = row
-        this.y = col
+        this.x = col
+        this.y = row
     }
 
     distanceTo(otherPoint: CellIndex): number {

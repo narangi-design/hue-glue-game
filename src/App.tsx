@@ -1,14 +1,16 @@
 import { useState, useEffect } from "react"
 import Grid from "./components/Grid"
 import { generateGrid } from "./utils/color"
-import Color from "./utils/color"
+import Cell from "./utils/cell"
 
 function App() {
-  const [cells, setCells] = useState<(Color | null)[][]>([])
+  const [cells, setCells] = useState<Cell[][]>([])
+  const [initialGrid, setInitialGrid] = useState<Cell[][]>([])
 
   useEffect(() => {
-    const initialGrid = generateGrid(7, 7)
-    setCells(initialGrid)
+    const grid = generateGrid(15, 15)
+    setInitialGrid(grid)
+    setCells(grid)
   }, [])
 
   return (

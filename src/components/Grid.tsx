@@ -1,9 +1,9 @@
 import Cell from "./Cell"
-import Color from "../utils/color"
+import CellModel from "../utils/cell"
 import "../styles/Grid.css"
 
 interface GridProps {
-  cells: (Color | null)[][]
+  cells: CellModel[][]
   cellSize?: number
   gap?: number
 }
@@ -21,7 +21,9 @@ function Grid({ cells, cellSize = 50, gap = 4 }: GridProps) {
   return (
     <div className="grid" style={gridStyle}>
       {cells.map((row, i) =>
-        row.map((color, j) => <Cell key={`${i}-${j}`} color={color!} />)
+        row.map((cell, j) => (
+          <Cell key={`${i}-${j}`} color={cell.color!} isAnchor={cell.isAnchor} />
+        ))
       )}
     </div>
   )

@@ -2,12 +2,13 @@ import Color from "../utils/color"
 
 interface CellProps {
   color: Color
+  isAnchor: boolean
 }
 
-function Cell({ color }: CellProps) {
+function Cell({ color, isAnchor }: CellProps) {
   return (
     <div
-      className="cell"
+      className={`cell ${isAnchor ? "anchor" : ""}`}
       style={{
         backgroundColor: color.rgb
       }}

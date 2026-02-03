@@ -84,3 +84,19 @@ export function loadGame(): SavedGame | null {
         return null
     }
 }
+
+export function compareGrids(cells: Cell[][], levelData: LevelData): boolean {
+    for (const target of levelData) {
+        const cell = cells[target.y]?.[target.x]
+        if (!cell?.color) return false
+
+        if (
+            Math.round(cell.color.r) !== Math.round(target.r) ||
+            Math.round(cell.color.g) !== Math.round(target.g) ||
+            Math.round(cell.color.b) !== Math.round(target.b)
+        ) {
+            return false
+        }
+    }
+    return true
+}

@@ -3,12 +3,13 @@ import Grid from "./components/Grid"
 import Button from "./components/Button"
 import { generateGrid, shuffleGrid } from "./utils/color"
 import Cell from "./utils/cell"
-import { LevelData, serializeGrid, deserializeGrid, saveGame, loadGame } from "./utils/level"
+import { LevelData, serializeGrid, deserializeGrid, saveGame, loadGame, compareGrids } from "./utils/level"
 
 function App() {
   const [cells, setCells] = useState<Cell[][]>([])
   const [levelData, setLevelData] = useState<LevelData | null>(null)
   const [selectedCell, setSelectedCell] = useState<{ x: number; y: number } | null>(null)
+  const [won, setWon] = useState(false)
 
   useEffect(() => {
     const saved = loadGame()
@@ -26,9 +27,12 @@ function App() {
     setCells(shuffled)
     saveGame(level, shuffled)
     setSelectedCell(null)
+    setWon(false)
   }
 
   const handleCellClick = (x: number, y: number) => {
+    if (won) return
+
     if (!selectedCell) {
       setSelectedCell({ x, y })
       return
@@ -58,7 +62,12 @@ function App() {
           return cell
         })
       )
-      if (levelData) saveGame(levelData, newCells)
+      if (levelData) {
+        saveGame(levelData, newCells)
+        if (compareGrids(newCells, levelData)) {
+          setWon(true)
+        }
+      }
       return newCells
     })
     setSelectedCell(null)
@@ -67,8 +76,9 @@ function App() {
   return (
     <div className="app">
       <h1>Hue Glue</h1>
-      <Button onClick={handleNewGame}>New Game</Button>
       <Grid cells={cells} selectedCell={selectedCell} onCellClick={handleCellClick} />
+      <Button onClick={handleNewGame}>New Game</Button>
+      {won && <p className="win-message">You won!</p>}
     </div>
   )
 }

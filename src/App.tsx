@@ -2,36 +2,36 @@ import { useState, useEffect } from "react"
 import Grid from "./components/Grid"
 import Button from "./components/Button"
 import { generateGrid, shuffleGrid } from "./utils/color"
-import Cell from "./utils/cell"
-import { LevelData, serializeGrid, deserializeGrid, saveGame, loadGame, compareGrids } from "./utils/level"
+import { CellModel } from "./utils/cell"
+import { saveGame, loadGame, compareGrids } from "./utils/level"
 
 function App() {
-  const [cells, setCells] = useState<Cell[][]>([])
-  const [levelData, setLevelData] = useState<LevelData | null>(null)
+  const [currentGrid, setCurrentGrid] = useState<CellModel[][]>([])
+  const [targetGrid, setTargetGrid] = useState<CellModel[][]>([])
   const [selectedCell, setSelectedCell] = useState<{ x: number; y: number } | null>(null)
-  const [won, setWon] = useState(false)
+  const [draggedCell, setDraggedCell] = useState<{ x: number; y: number } | null>(null)
+  const [win, setWin] = useState(false)
 
   useEffect(() => {
     const saved = loadGame()
     if (saved) {
-      setLevelData(saved.levelData)
-      setCells(deserializeGrid(saved.cells))
+      setTargetGrid(saved.initialGridState)
+      setCurrentGrid(saved.currentGridState)
     }
   }, [])
 
   const handleNewGame = () => {
-    const grid = generateGrid(10, 10)
-    const level = serializeGrid(grid)
+    const grid = generateGrid(6, 6)
     const shuffled = shuffleGrid(grid)
-    setLevelData(level)
-    setCells(shuffled)
-    saveGame(level, shuffled)
+    setTargetGrid(grid)
+    setCurrentGrid(shuffled)
+    saveGame(grid, shuffled)
     setSelectedCell(null)
-    setWon(false)
+    setWin(false)
   }
 
   const handleCellClick = (x: number, y: number) => {
-    if (won) return
+    if (win) return
 
     if (!selectedCell) {
       setSelectedCell({ x, y })
@@ -43,29 +43,29 @@ function App() {
       return
     }
 
-    setCells(prev => {
+    setCurrentGrid(prev => {
       const colorA = prev[selectedCell.y][selectedCell.x].color
       const colorB = prev[y][x].color
 
       const newCells = prev.map((row, i) =>
         row.map((cell, j) => {
           if (i === selectedCell.y && j === selectedCell.x) {
-            const newCell = new Cell(cell.isAnchor)
+            const newCell = new CellModel(cell.isAnchor)
             newCell.color = colorB
             return newCell
           }
           if (i === y && j === x) {
-            const newCell = new Cell(cell.isAnchor)
+            const newCell = new CellModel(cell.isAnchor)
             newCell.color = colorA
             return newCell
           }
           return cell
         })
       )
-      if (levelData) {
-        saveGame(levelData, newCells)
-        if (compareGrids(newCells, levelData)) {
-          setWon(true)
+      if (targetGrid) {
+        saveGame(targetGrid, newCells)
+        if (compareGrids(newCells, targetGrid)) {
+          setWin(true)
         }
       }
       return newCells
@@ -73,12 +73,71 @@ function App() {
     setSelectedCell(null)
   }
 
+  const handleDragStart = (x: number, y: number) => {
+    if (win) return
+    setDraggedCell({ x, y })
+  }
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault()
+  }
+
+  const handleDragEnd = () => {
+    setDraggedCell(null)
+  }
+
+  const handleDrop = (x: number, y: number) => {
+    if (win || !draggedCell) return
+    if (draggedCell.x === x && draggedCell.y === y) {
+      setDraggedCell(null)
+      return
+    }
+
+    setCurrentGrid(prev => {
+      const colorA = prev[draggedCell.y][draggedCell.x].color
+      const colorB = prev[y][x].color
+
+      const newCells = prev.map((row, i) =>
+        row.map((cell, j) => {
+          if (i === draggedCell.y && j === draggedCell.x) {
+            const newCell = new CellModel(cell.isAnchor)
+            newCell.color = colorB
+            return newCell
+          }
+          if (i === y && j === x) {
+            const newCell = new CellModel(cell.isAnchor)
+            newCell.color = colorA
+            return newCell
+          }
+          return cell
+        })
+      )
+      if (targetGrid) {
+        saveGame(targetGrid, newCells)
+        if (compareGrids(newCells, targetGrid)) {
+          setWin(true)
+        }
+      }
+      return newCells
+    })
+    setDraggedCell(null)
+  }
+
   return (
     <div className="app">
       <h1>Hue Glue</h1>
-      <Grid cells={cells} selectedCell={selectedCell} onCellClick={handleCellClick} />
+      <Grid
+        cells={currentGrid}
+        selectedCell={selectedCell}
+        draggedCell={draggedCell}
+        onCellClick={handleCellClick}
+        onCellDragStart={handleDragStart}
+        onCellDragEnd={handleDragEnd}
+        onCellDragOver={handleDragOver}
+        onCellDrop={handleDrop}
+      />
       <Button onClick={handleNewGame}>New Game</Button>
-      {won && <p className="win-message">You won!</p>}
+      {win && <p className="win-message">You won!</p>}
     </div>
   )
 }

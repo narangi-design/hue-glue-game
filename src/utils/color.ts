@@ -1,7 +1,6 @@
 import Grid from "./grid"
-import { lerp as lerpMath } from "./math"
-import CellIndex from "./cell-index"
-import Cell from "./cell"
+import { lerp as lerpMath, getRandomValue, clamp } from "./math"
+import { CellModel } from "./cell"
 import {
     COLOR,
     BRIGHTNESS,
@@ -61,12 +60,10 @@ class Color {
     }
 
     static random(): Color {
-        const randomInRange = (min: number, max: number) => Math.floor(Math.random() * (max - min + 1)) + min
-
         return new Color(
-            randomInRange(COLOR.MIN, COLOR.MAX),
-            randomInRange(COLOR.MIN, COLOR.MAX),
-            randomInRange(COLOR.MIN, COLOR.MAX)
+            getRandomValue(COLOR.MIN, COLOR.MAX),
+            getRandomValue(COLOR.MIN, COLOR.MAX),
+            getRandomValue(COLOR.MIN, COLOR.MAX)
         )
     }
 
@@ -75,24 +72,20 @@ class Color {
         const targetBrightness = brightness > BRIGHTNESS.THRESHOLD ? BRIGHTNESS.MIN : BRIGHTNESS.MAX
         const factor = targetBrightness / brightness
         return new Color(
-            Math.max(COLOR.MIN, Math.min(COLOR.MAX, color.r * factor)),
-            Math.max(COLOR.MIN, Math.min(COLOR.MAX, color.g * factor)),
-            Math.max(COLOR.MIN, Math.min(COLOR.MAX, color.b * factor))
+            clamp(color.r * factor, COLOR.MIN, COLOR.MAX),
+            clamp(color.g * factor, COLOR.MIN, COLOR.MAX),
+            clamp(color.b * factor, COLOR.MIN, COLOR.MAX)
         )
     }
 
     static shiftHue(color: Color, degrees: number): Color {
         const offset = degrees / 360 * 255
         return new Color(
-            Math.max(COLOR.MIN, Math.min(COLOR.MAX, (color.r + offset) % 256)),
-            Math.max(COLOR.MIN, Math.min(COLOR.MAX, (color.g + offset * 0.7) % 256)),
-            Math.max(COLOR.MIN, Math.min(COLOR.MAX, (color.b + offset * 1.3) % 256))
+            clamp((color.r + offset) % 256, COLOR.MIN, COLOR.MAX),
+            clamp((color.g + offset * 0.7) % 256, COLOR.MIN, COLOR.MAX),
+            clamp((color.b + offset * 1.3) % 256, COLOR.MIN, COLOR.MAX)
         )
     }
-}
-
-interface AnchorWithColor extends CellIndex {
-    color?: Color
 }
 
 function makeListOfAnchorColors(anchorCount: number, minDistance: number, minBrightnessDiff: number): Color[] {
@@ -134,32 +127,19 @@ function makeListOfAnchorColors(anchorCount: number, minDistance: number, minBri
     return colors
 }
 
-function colorAnchors(
-    anchors: CellIndex[],
-    minDistance: number,
-    minBrightnessDiff: number
-): AnchorWithColor[] {
-    let anchorColors = makeListOfAnchorColors(anchors.length, minDistance, minBrightnessDiff)
-    const anchorWithColors = anchors as AnchorWithColor[]
-    for (const anchor of anchorWithColors) {
-        anchor.color = anchorColors.shift()
-    }
-    return anchorWithColors
-}
-
-function colorRest(grid: Cell[][], anchors: AnchorWithColor[]): Cell[][] {
+function colorRest(grid: CellModel[][], anchorColors: Color[]): CellModel[][] {
     const rows = grid.length
     const cols = grid[0].length
 
-    // Anchors are: [top-left, top-right, bottom-left, bottom-right]
-    const [topleft, topright, bottomleft, bottomright] = anchors
+    // FIXME
+    const [topleft, topright, bottomleft, bottomright] = anchorColors
 
     for (let i = 0; i < rows; i++) {
         for (let j = 0; j < cols; j++) {
             if (!grid[i][j].isAnchor) {
                 const tx = j / (cols - 1)
                 const ty = i / (rows - 1)
-                grid[i][j].color = Color.bilerp(topleft.color!, topright.color!, bottomleft.color!, bottomright.color!, tx, ty)
+                grid[i][j].color = Color.bilerp(topleft, topright, bottomleft, bottomright, tx, ty)
             }
         }
     }
@@ -168,25 +148,26 @@ function colorRest(grid: Cell[][], anchors: AnchorWithColor[]): Cell[][] {
 }
 
 //generate a grid of given dimensions with colored anchors and interpolated colors in between
-export function generateGrid(rows: number, cols: number): Cell[][] {
+export function generateGrid(rows: number, cols: number): CellModel[][] {
     if (!Number.isInteger(rows) || !Number.isInteger(cols) || rows <= 0 || cols <= 0) {
         throw new Error(`generateGrid: invalid dimensions rows=${rows}, cols=${cols}`)
     }
 
     const grid = new Grid(rows, cols)
 
-    let coloredAnchors = colorAnchors(grid.anchors, MIN_COLOR_DISTANCE, MIN_BRIGHTNESS_DIFFERENCE)
+    // FIXME guarantee elementwise correspondence with grid.anchors
+    let anchorColors = makeListOfAnchorColors(grid.anchors.length, MIN_COLOR_DISTANCE, MIN_BRIGHTNESS_DIFFERENCE)
 
-    for (const a of coloredAnchors) {
-        grid.cells[a.y][a.x].color = a.color
+    for (const [i, a] of grid.anchors.entries()) {
+        grid.cells[a.y][a.x].color = anchorColors[i]
     }
 
     //fill in the rest of the grid
-    return colorRest(grid.cells, coloredAnchors)
+    return colorRest(grid.cells, anchorColors)
 }
 
 //shuffle all cells except anchors
-export function shuffleGrid(grid: Cell[][]): Cell[][] {
+export function shuffleGrid(grid: CellModel[][]): CellModel[][] {
     const rows = grid.length
     const cols = grid[0].length
 
@@ -194,28 +175,32 @@ export function shuffleGrid(grid: Cell[][]): Cell[][] {
     for (let i = 0; i < rows; i++) {
         for (let j = 0; j < cols; j++) {
             if (!grid[i][j].isAnchor && grid[i][j].color) {
-                colors.push(grid[i][j].color!)
+                colors.push(grid[i][j].color)
             }
         }
     }
 
     for (let i = colors.length - 1; i > 0; i--) {
-        let j: number = Math.floor(Math.random() * (i + 1))
+        const j = Math.floor(Math.random() * (i + 1))
         const temp = colors[i]
         colors[i] = colors[j]
         colors[j] = temp
     }
 
     let colorIndex = 0
-    for (let i = 0; i < rows; i++) {
-        for (let j = 0; j < cols; j++) {
-            if (!grid[i][j].isAnchor && grid[i][j].color) {
-                grid[i][j].color = colors[colorIndex++]
+    const newGrid: CellModel[][] = grid.map(row =>
+        row.map(cell => {
+            const newCell = new CellModel(cell.isAnchor)
+            if (cell.isAnchor) {
+                newCell.color = cell.color
+            } else {
+                newCell.color = colors[colorIndex++]
             }
-        }
-    }
+            return newCell
+        })
+    )
 
-    return grid
+    return newGrid
 }
 
 export default Color

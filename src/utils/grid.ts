@@ -1,30 +1,30 @@
 import CellIndex from "./cell-index"
-import Cell from "./cell"
+import { CellModel } from "./cell"
 
 export default class Grid {
     rows: number
     cols: number
-    cells: Cell[][]
+    cells: CellModel[][]
     anchors: CellIndex[]
 
     constructor(rows: number, cols: number) {
         this.rows = rows
         this.cols = cols
         this.anchors = Grid.makeAnchorIndexes(rows, cols)
-        this.cells = Grid.#makeGrid(rows, cols, this.anchors)
+        this.cells = Grid.makeGrid(rows, cols, this.anchors)
     }
 
     getCell(cellIndex: { row: number; col: number }) {
         return this.cells[cellIndex.row][cellIndex.col]
     }
 
-    static #makeGrid(rows: number, cols: number, anchors: CellIndex[]): Cell[][] {
-        const grid: Cell[][] = []
+    static makeGrid(rows: number, cols: number, anchors: CellIndex[]): CellModel[][] {
+        const grid: CellModel[][] = []
         for (let row = 0; row < rows; row++) {
-            const cellRow: Cell[] = []
+            const cellRow: CellModel[] = []
             for (let col = 0; col < cols; col++) {
                 const isAnchorCell = anchors.some(anchor => anchor.y === row && anchor.x === col)
-                cellRow.push(new Cell(isAnchorCell))
+                cellRow.push(new CellModel(isAnchorCell))
             }
             grid.push(cellRow)
         }

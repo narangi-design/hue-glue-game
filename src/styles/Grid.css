@@ -1,11 +1,16 @@
 .grid {
   display: grid;
+  grid-template-columns: repeat(var(--cols), 1fr);
+  gap: 2px;
   margin: 20px auto;
+  width: min(90vw, 90vh, 500px);
+  max-width: 100%;
 }
 
 .cell {
   border-radius: 2px;
   transition: transform 0.1s ease, box-shadow 0.1s ease;
+  aspect-ratio: 1;
 }
 
 .cell.interactive {
@@ -27,4 +32,32 @@
   justify-content: center;
   color: rgba(0, 0, 0, 0.4);
   font-size: 24px;
+}
+
+.cell.dragging {
+  opacity: 0;
+}
+
+.drag-image {
+  width: 30px;
+  height: 30px;
+  opacity: 1;
+  border-radius: 2px;
+  position: absolute;
+  top: -1000px;
+}
+
+@media (max-width: 480px) {
+  .grid {
+    gap: 1px;
+    width: 95vw;
+  }
+
+  .cell {
+    aspect-ratio: 0.8;
+  }
+
+  .cell.anchor {
+    font-size: 16px;
+  }
 }

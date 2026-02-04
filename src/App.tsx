@@ -1,9 +1,13 @@
-import { useState, useEffect } from "react"
-import Grid from "./components/Grid"
-import Button from "./components/Button"
-import { generateGrid, shuffleGrid } from "./utils/color"
-import { CellModel } from "./utils/cell"
-import { saveGame, loadGame, compareGrids } from "./utils/level"
+import './styles/App.css'
+import './styles/Toggle.css'
+import { useState, useEffect } from 'react'
+import * as Toggle from '@radix-ui/react-toggle'
+import * as ToggleGroup from '@radix-ui/react-toggle-group'
+import Grid from './components/Grid'
+import Button from './components/Button'
+import { CellModel } from './utils/cell'
+import { generateGrid, shuffleGrid } from './utils/color'
+import { saveGame, loadGame, compareGrids } from './utils/level'
 
 function App() {
   const [currentGrid, setCurrentGrid] = useState<CellModel[][]>([])
@@ -11,6 +15,10 @@ function App() {
   const [selectedCell, setSelectedCell] = useState<{ x: number; y: number } | null>(null)
   const [draggedCell, setDraggedCell] = useState<{ x: number; y: number } | null>(null)
   const [win, setWin] = useState(false)
+  const [darkTheme, setDarkTheme] = useState(() =>
+    window.matchMedia('(prefers-color-scheme: dark)').matches
+  )
+  const [gridSize, setGridSize] = useState('8')
 
   useEffect(() => {
     const saved = loadGame()
@@ -20,8 +28,14 @@ function App() {
     }
   }, [])
 
+  useEffect(() => {
+    document.documentElement.classList.remove('dark', 'light')
+    document.documentElement.classList.add(darkTheme ? 'dark' : 'light')
+  }, [darkTheme])
+
   const handleNewGame = () => {
-    const grid = generateGrid(6, 6)
+    const size = parseInt(gridSize)
+    const grid = generateGrid(size, size)
     const shuffled = shuffleGrid(grid)
     setTargetGrid(grid)
     setCurrentGrid(shuffled)
@@ -124,21 +138,43 @@ function App() {
   }
 
   return (
-    <div className="app">
-      <h1>Hue Glue</h1>
-      <Grid
-        cells={currentGrid}
-        selectedCell={selectedCell}
-        draggedCell={draggedCell}
-        onCellClick={handleCellClick}
-        onCellDragStart={handleDragStart}
-        onCellDragEnd={handleDragEnd}
-        onCellDragOver={handleDragOver}
-        onCellDrop={handleDrop}
-      />
-      <Button onClick={handleNewGame}>New Game</Button>
-      {win && <p className="win-message">You won!</p>}
-    </div>
+    <>
+      <Toggle.Root
+        className='theme-toggle'
+        pressed={darkTheme}
+        onPressedChange={setDarkTheme}
+      >
+        {darkTheme ? 'Dark' : 'Light'}
+      </Toggle.Root>
+
+      <div className='app'>
+        <h1>Hue Glue</h1>
+        <Grid
+          cells={currentGrid}
+          selectedCell={selectedCell}
+          draggedCell={draggedCell}
+          onCellClick={handleCellClick}
+          onCellDragStart={handleDragStart}
+          onCellDragEnd={handleDragEnd}
+          onCellDragOver={handleDragOver}
+          onCellDrop={handleDrop}
+        />
+        <div className='controls'>
+          <ToggleGroup.Root
+            className='toggle-group'
+            type='single'
+            value={gridSize}
+            onValueChange={(value) => value && setGridSize(value)}
+          >
+            <ToggleGroup.Item className='toggle-item' value='6'>6x6</ToggleGroup.Item>
+            <ToggleGroup.Item className='toggle-item' value='8'>8x8</ToggleGroup.Item>
+            <ToggleGroup.Item className='toggle-item' value='10'>10x10</ToggleGroup.Item>
+          </ToggleGroup.Root>
+          <Button onClick={handleNewGame}>New Game</Button>
+        </div>
+        {win && <p className='win-message'>You won!</p>}
+      </div>
+    </>
   )
 }
 

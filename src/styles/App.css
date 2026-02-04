@@ -1,0 +1,26 @@
+.app {
+  width: 100%;
+  max-width: 600px;
+  padding: 2rem 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.win-message {
+  font-family: var(--font-serif);
+  font-size: 1.5rem;
+  color: var(--color-orange);
+  font-weight: 500;
+}
+
+@media (max-width: 480px) {
+  .app {
+    padding: 1rem 0.5rem;
+  }
+
+  .app h1 {
+    font-size: 2rem;
+  }
+}

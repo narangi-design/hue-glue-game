@@ -1,0 +1,164 @@
+:root {
+  /* Base palette */
+  --color-orange: #F47B20;
+  --color-orange-dark: #d96a1a;
+  --color-sage: #A8B5A0;
+  --color-cream: #E8E4D9;
+  --color-charcoal: #3A3A3A;
+
+  /* Semantic colors */
+  --color-primary: var(--color-orange);
+  --color-primary-hover: var(--color-orange-dark);
+  --color-secondary: var(--color-sage);
+  --color-background: var(--color-cream);
+  --color-surface: #ffffff;
+  --grid-bg: #ffffff;
+
+  /* Text colors */
+  --text-primary: var(--color-charcoal);
+  --text-secondary: #5a5a5a;
+  --text-muted: #7a7a7a;
+  --text-inverse: #ffffff;
+  --text-accent: var(--color-orange);
+
+  /* Button colors */
+  --btn-bg: var(--color-primary);
+  --btn-bg-hover: var(--color-primary-hover);
+  --btn-text: var(--text-inverse);
+
+  /* Font families */
+  --font-serif: 'EB Garamond', Georgia, serif;
+  --font-sans: 'Source Sans 3', system-ui, sans-serif;
+  --font-heading: var(--font-serif);
+  --font-body: var(--font-sans);
+
+  /* Font sizes */
+  --text-xs: 0.75rem;
+  --text-s: 0.875rem;
+  --text-base: 1rem;
+  --text-l: 1.125rem;
+  --text-xl: 1.25rem;
+  --text-2xl: 1.5rem;
+  --text-3xl: 2rem;
+  --text-4xl: 2.5rem;
+
+  /* Spacing */
+  --space-xs: 0.25rem;
+  --space-s: 0.5rem;
+  --space-m: 1rem;
+  --space-l: 1.5rem;
+  --space-xl: 2rem;
+
+  /* Border radius */
+  --radius-s: 2px;
+  --radius-m: 4px;
+  --radius-l: 8px;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--font-body);
+  font-size: var(--text-base);
+  line-height: 1.5;
+  color: var(--text-primary);
+  background-color: var(--color-background);
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--font-heading);
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+h1 {
+  font-size: var(--text-4xl);
+}
+
+h2 {
+  font-size: var(--text-3xl);
+}
+
+h3 {
+  font-size: var(--text-2xl);
+}
+
+button {
+  font-family: var(--font-body);
+  font-size: var(--text-base);
+  font-weight: 500;
+  padding: 0.75em 1.5em;
+  border: none;
+  border-radius: var(--radius-s);
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.1s ease;
+  background-color: var(--btn-bg);
+  color: var(--btn-text);
+}
+
+button:hover {
+  background-color: var(--btn-bg-hover);
+}
+
+button:active {
+  transform: scale(0.95);
+}
+
+button:focus-visible {
+  outline: 2px solid var(--text-primary);
+  outline-offset: 2px;
+}
+
+/* Dark theme - system preference */
+@media (prefers-color-scheme: dark) {
+  :root:not(.dark):not(.light) {
+    --color-background: #1a1a1a;
+    --color-surface: #2a2a2a;
+    --grid-bg: #000000;
+
+    --text-primary: #f0f0f0;
+    --text-secondary: #c0c0c0;
+    --text-muted: #909090;
+    --text-inverse: #1a1a1a;
+
+    --btn-text: #ffffff;
+  }
+}
+
+/* Dark theme - manual override */
+:root.dark {
+  --color-background: #1a1a1a;
+  --color-surface: #2a2a2a;
+  --grid-bg: #000000;
+
+  --text-primary: #f0f0f0;
+  --text-secondary: #c0c0c0;
+  --text-muted: #909090;
+  --text-inverse: #1a1a1a;
+
+  --btn-text: #ffffff;
+}
+
+/* Light theme - manual override (for when system prefers dark) */
+:root.light {
+  --color-background: var(--color-cream);
+  --color-surface: #ffffff;
+  --grid-bg: #ffffff;
+
+  --text-primary: var(--color-charcoal);
+  --text-secondary: #5a5a5a;
+  --text-muted: #7a7a7a;
+  --text-inverse: #ffffff;
+
+  --btn-text: #ffffff;
+}

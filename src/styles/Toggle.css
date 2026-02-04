@@ -1,0 +1,56 @@
+/* Theme toggle */
+.theme-toggle {
+  position: fixed;
+  top: var(--space-m);
+  left: var(--space-m);
+  padding: var(--space-s) var(--space-m);
+  background-color: var(--color-surface);
+  border-radius: var(--radius-s);
+  font-family: var(--font-body);
+  font-size: var(--text-s);
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.theme-toggle:hover {
+  background-color: var(--color-secondary);
+}
+
+.theme-toggle[data-state="on"] {
+  background-color: var(--color-charcoal);
+  color: var(--text-primary);
+}
+
+/* Controls */
+.controls {
+  display: flex;
+  gap: var(--space-m);
+  align-items: center;
+}
+
+/* Toggle group */
+.toggle-group {
+  display: flex;
+  border-radius: var(--radius-s);
+  overflow: hidden;
+}
+
+.toggle-item {
+  padding: var(--space-s) var(--space-m);
+  background-color: var(--color-surface);
+  font-family: var(--font-body);
+  font-size: var(--text-s);
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.toggle-item:hover {
+  background-color: var(--color-secondary);
+}
+
+.toggle-item[data-state="on"] {
+  background-color: var(--color-primary);
+  color: var(--text-inverse);
+}

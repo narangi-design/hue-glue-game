@@ -1,7 +1,6 @@
 import Cell from "./Cell"
 import { CellModel } from "../utils/cell"
 import "../styles/Grid.css"
-import Color from "../utils/color"
 
 interface GridProps {
   cells: CellModel[][]

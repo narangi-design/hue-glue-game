@@ -1,18 +1,14 @@
 .app {
   width: 100%;
   max-width: 600px;
+  max-height: 100vh;
+  max-height: 100dvh;
   padding: 2rem 1rem;
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
   gap: 1.5rem;
-}
-
-.win-message {
-  font-family: var(--font-serif);
-  font-size: 1.5rem;
-  color: var(--color-orange);
-  font-weight: 500;
 }
 
 @media (max-width: 480px) {

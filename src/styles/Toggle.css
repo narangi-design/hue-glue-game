@@ -29,28 +29,64 @@
   align-items: center;
 }
 
-/* Toggle group */
+/* Toggle group — line with bullets */
 .toggle-group {
+  --bullet-size: 1.125rem;
   display: flex;
-  border-radius: var(--radius-s);
-  overflow: hidden;
+  align-items: center;
+  position: relative;
+}
+
+/* Connecting line between bullets */
+.toggle-group::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: calc(var(--space-m) + var(--bullet-size) / 2);
+  right: calc(var(--space-m) + var(--bullet-size) / 2);
+  height: 0.125rem;
+  background-color: var(--color-sage);
+  transform: translateY(-50%);
 }
 
 .toggle-item {
-  padding: var(--space-s) var(--space-m);
+  position: relative;
+  width: var(--bullet-size);
+  height: var(--bullet-size);
+  padding: 0;
+  margin: 0 var(--space-m);
+  border-radius: 50%;
   background-color: var(--color-surface);
-  font-family: var(--font-body);
-  font-size: var(--text-s);
-  color: var(--text-primary);
+  border: 0.125rem solid var(--color-sage);
   cursor: pointer;
-  transition: background-color 0.2s ease;
+  user-select: none;
+  transition: all 0.2s ease;
 }
 
 .toggle-item:hover {
-  background-color: var(--color-secondary);
+  border-color: var(--color-primary);
 }
 
 .toggle-item[data-state="on"] {
   background-color: var(--color-primary);
-  color: var(--text-inverse);
+  border-color: var(--color-primary);
+  transform: scale(1.2);
+}
+
+/* Labels below bullets */
+.toggle-item::after {
+  content: attr(data-label);
+  position: absolute;
+  top: calc(100% + var(--space-xs));
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: var(--font-sans);
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.toggle-item[data-state="on"]::after {
+  color: var(--color-primary);
+  font-weight: 600;
 }

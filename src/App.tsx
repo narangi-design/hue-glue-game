@@ -13,11 +13,12 @@ function App() {
   const [currentGrid, setCurrentGrid] = useState<CellModel[][]>([])
   const [targetGrid, setTargetGrid] = useState<CellModel[][]>([])
   const [selectedCell, setSelectedCell] = useState<{ x: number; y: number } | null>(null)
-  const [draggedCell, setDraggedCell] = useState<{ x: number; y: number } | null>(null)
   const [win, setWin] = useState(false)
-  const [darkTheme, setDarkTheme] = useState(() =>
-    window.matchMedia('(prefers-color-scheme: dark)').matches
-  )
+  const [darkTheme, setDarkTheme] = useState(() => {
+    const saved = localStorage.getItem('darkTheme')
+    if (saved !== null) return saved === 'true'
+    return window.matchMedia('(prefers-color-scheme: dark)').matches
+  })
   const [gridSize, setGridSize] = useState('8')
 
   useEffect(() => {
@@ -31,6 +32,7 @@ function App() {
   useEffect(() => {
     document.documentElement.classList.remove('dark', 'light')
     document.documentElement.classList.add(darkTheme ? 'dark' : 'light')
+    localStorage.setItem('darkTheme', String(darkTheme))
   }, [darkTheme])
 
   const handleNewGame = () => {
@@ -44,97 +46,53 @@ function App() {
     setWin(false)
   }
 
-  const handleCellClick = (x: number, y: number) => {
+  const swapCells = (fromCol: number, fromRow: number, toCol: number, toRow: number) => {
+    if (win) return
+
+    setCurrentGrid(prev => {
+      const colorA = prev[fromRow][fromCol].color
+      const colorB = prev[toRow][toCol].color
+
+      const newCells = prev.map((row, i) =>
+        row.map((cell, j) => {
+          if (i === fromRow && j === fromCol) {
+            const newCell = new CellModel(cell.isAnchor)
+            newCell.color = colorB
+            return newCell
+          }
+          if (i === toRow && j === toCol) {
+            const newCell = new CellModel(cell.isAnchor)
+            newCell.color = colorA
+            return newCell
+          }
+          return cell
+        })
+      )
+      if (targetGrid) {
+        saveGame(targetGrid, newCells)
+        if (compareGrids(newCells, targetGrid)) {
+          setWin(true)
+        }
+      }
+      return newCells
+    })
+  }
+
+  const handleCellClick = (col: number, row: number) => {
     if (win) return
 
     if (!selectedCell) {
-      setSelectedCell({ x, y })
+      setSelectedCell({ x: col, y: row })
       return
     }
 
-    if (selectedCell.x === x && selectedCell.y === y) {
+    if (selectedCell.x === col && selectedCell.y === row) {
       setSelectedCell(null)
       return
     }
 
-    setCurrentGrid(prev => {
-      const colorA = prev[selectedCell.y][selectedCell.x].color
-      const colorB = prev[y][x].color
-
-      const newCells = prev.map((row, i) =>
-        row.map((cell, j) => {
-          if (i === selectedCell.y && j === selectedCell.x) {
-            const newCell = new CellModel(cell.isAnchor)
-            newCell.color = colorB
-            return newCell
-          }
-          if (i === y && j === x) {
-            const newCell = new CellModel(cell.isAnchor)
-            newCell.color = colorA
-            return newCell
-          }
-          return cell
-        })
-      )
-      if (targetGrid) {
-        saveGame(targetGrid, newCells)
-        if (compareGrids(newCells, targetGrid)) {
-          setWin(true)
-        }
-      }
-      return newCells
-    })
+    swapCells(selectedCell.x, selectedCell.y, col, row)
     setSelectedCell(null)
-  }
-
-  const handleDragStart = (x: number, y: number) => {
-    if (win) return
-    setDraggedCell({ x, y })
-  }
-
-  const handleDragOver = (e: React.DragEvent) => {
-    e.preventDefault()
-  }
-
-  const handleDragEnd = () => {
-    setDraggedCell(null)
-  }
-
-  const handleDrop = (x: number, y: number) => {
-    if (win || !draggedCell) return
-    if (draggedCell.x === x && draggedCell.y === y) {
-      setDraggedCell(null)
-      return
-    }
-
-    setCurrentGrid(prev => {
-      const colorA = prev[draggedCell.y][draggedCell.x].color
-      const colorB = prev[y][x].color
-
-      const newCells = prev.map((row, i) =>
-        row.map((cell, j) => {
-          if (i === draggedCell.y && j === draggedCell.x) {
-            const newCell = new CellModel(cell.isAnchor)
-            newCell.color = colorB
-            return newCell
-          }
-          if (i === y && j === x) {
-            const newCell = new CellModel(cell.isAnchor)
-            newCell.color = colorA
-            return newCell
-          }
-          return cell
-        })
-      )
-      if (targetGrid) {
-        saveGame(targetGrid, newCells)
-        if (compareGrids(newCells, targetGrid)) {
-          setWin(true)
-        }
-      }
-      return newCells
-    })
-    setDraggedCell(null)
   }
 
   return (
@@ -146,18 +104,14 @@ function App() {
       >
         {darkTheme ? 'Dark' : 'Light'}
       </Toggle.Root>
-
       <div className='app'>
         <h1>Hue Glue</h1>
         <Grid
           cells={currentGrid}
           selectedCell={selectedCell}
-          draggedCell={draggedCell}
+          win={win}
           onCellClick={handleCellClick}
-          onCellDragStart={handleDragStart}
-          onCellDragEnd={handleDragEnd}
-          onCellDragOver={handleDragOver}
-          onCellDrop={handleDrop}
+          onCellSwap={swapCells}
         />
         <div className='controls'>
           <ToggleGroup.Root
@@ -166,13 +120,12 @@ function App() {
             value={gridSize}
             onValueChange={(value) => value && setGridSize(value)}
           >
-            <ToggleGroup.Item className='toggle-item' value='6'>6x6</ToggleGroup.Item>
-            <ToggleGroup.Item className='toggle-item' value='8'>8x8</ToggleGroup.Item>
-            <ToggleGroup.Item className='toggle-item' value='10'>10x10</ToggleGroup.Item>
+            <ToggleGroup.Item className='toggle-item' value='6' data-label='6x6' />
+            <ToggleGroup.Item className='toggle-item' value='8' data-label='8x8' />
+            <ToggleGroup.Item className='toggle-item' value='10' data-label='10x10' />
           </ToggleGroup.Root>
           <Button onClick={handleNewGame}>New Game</Button>
         </div>
-        {win && <p className='win-message'>You won!</p>}
       </div>
     </>
   )

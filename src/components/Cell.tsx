@@ -1,3 +1,4 @@
+import { useDraggable, useDroppable } from "@dnd-kit/core"
 import Color from "../utils/color"
 
 interface CellProps {
@@ -5,45 +6,46 @@ interface CellProps {
   isAnchor: boolean
   isSelected?: boolean
   isDragging?: boolean
+  col: number
+  row: number
   onClick?: () => void
-  onDragStart?: (e: React.DragEvent) => void
-  onDragEnd?: () => void
-  onDragOver?: (e: React.DragEvent) => void
-  onDrop?: () => void
 }
 
-function Cell({ color, isAnchor, isSelected, isDragging, onClick, onDragStart, onDragEnd, onDragOver, onDrop }: CellProps) {
+function Cell({ color, isAnchor, isSelected, isDragging, col, row, onClick }: CellProps) {
+  const id = `cell-${col}-${row}`
+
+  const { setNodeRef: setDraggableRef, listeners, attributes } = useDraggable({
+    id,
+    disabled: isAnchor,
+    data: { col, row, color },
+  })
+
+  const { setNodeRef: setDroppableRef } = useDroppable({
+    id,
+    disabled: isAnchor,
+    data: { col, row },
+  })
+
   const className = [
     "cell",
     isAnchor ? "anchor" : "interactive",
     isSelected ? "selected" : "",
-    isDragging ? "dragging" : ""
+    isDragging ? "dragging" : "",
   ].filter(Boolean).join(" ")
-
-  const handleDragStart = (e: React.DragEvent) => {
-    const dragImage = document.createElement("div")
-    dragImage.className = "drag-image"
-    dragImage.style.backgroundColor = color.rgb
-    document.body.appendChild(dragImage)
-    e.dataTransfer.setDragImage(dragImage, 15, 15)
-    setTimeout(() => document.body.removeChild(dragImage), 0)
-    onDragStart?.(e)
-  }
 
   return (
     <div
+      ref={(node) => {
+        setDraggableRef(node)
+        setDroppableRef(node)
+      }}
       className={className}
       style={{ backgroundColor: color.rgb }}
       onClick={isAnchor ? undefined : onClick}
-      draggable={!isAnchor}
-      onDragStart={isAnchor ? undefined : handleDragStart}
-      onDragEnd={isAnchor ? undefined : onDragEnd}
-      onDragOver={isAnchor ? undefined : onDragOver}
-      onDrop={isAnchor ? undefined : onDrop}
+      {...(isAnchor ? {} : listeners)}
+      {...(isAnchor ? {} : attributes)}
     >
-      <span>
-        {isAnchor? '•' : ''}
-      </span>
+      <span>{isAnchor ? "•" : ""}</span>
     </div>
   )
 }

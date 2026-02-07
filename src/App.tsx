@@ -1,5 +1,7 @@
 import './styles/App.css'
 import './styles/Toggle.css'
+import sunIcon from './assets/sun.svg?raw'
+import moonIcon from './assets/moon.svg?raw'
 import { useState, useEffect } from 'react'
 import * as Toggle from '@radix-ui/react-toggle'
 import * as ToggleGroup from '@radix-ui/react-toggle-group'
@@ -102,7 +104,9 @@ function App() {
         pressed={darkTheme}
         onPressedChange={setDarkTheme}
       >
-        {darkTheme ? 'Dark' : 'Light'}
+        <span className='theme-knob'>
+          <span className='theme-icon' dangerouslySetInnerHTML={{ __html: darkTheme ? moonIcon : sunIcon }} />
+        </span>
       </Toggle.Root>
       <div className='app'>
         <h1>Hue Glue</h1>
@@ -123,6 +127,7 @@ function App() {
             <ToggleGroup.Item className='toggle-item' value='6' data-label='6x6' />
             <ToggleGroup.Item className='toggle-item' value='8' data-label='8x8' />
             <ToggleGroup.Item className='toggle-item' value='10' data-label='10x10' />
+            <ToggleGroup.Item className='toggle-item' value='12' data-label='12x12' />
           </ToggleGroup.Root>
           <Button onClick={handleNewGame}>New Game</Button>
         </div>

@@ -76,24 +76,11 @@ body {
   overflow: hidden;
 }
 
-h1,
-h2,
-h3 {
+h1 {
   font-family: var(--font-heading);
   font-weight: 500;
   color: var(--text-primary);
-}
-
-h1 {
   font-size: var(--text-4xl);
-}
-
-h2 {
-  font-size: var(--text-3xl);
-}
-
-h3 {
-  font-size: var(--text-2xl);
 }
 
 button {
@@ -101,16 +88,20 @@ button {
   font-size: var(--text-base);
   font-weight: 500;
   padding: 0.75em 1.5em;
-  border: none;
+  border: 0.125rem solid var(--text-primary);
   border-radius: var(--radius-s);
   cursor: pointer;
-  transition: background-color 0.2s ease, transform 0.1s ease;
-  background-color: var(--btn-bg);
-  color: var(--btn-text);
+  transition: background-color 0.2s ease, color 0.2s ease, transform 0.1s ease;
+  background-color: transparent;
+  color: var(--text-primary);
 }
 
-button:hover {
-  background-color: var(--btn-bg-hover);
+@media (hover: hover) {
+  button:hover {
+    border-color: transparent;
+    background-color: var(--color-primary);
+    color: var(--btn-text);
+  }
 }
 
 button:active {

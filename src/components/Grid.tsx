@@ -25,8 +25,8 @@ interface ActiveCell {
 function Grid({ cells, selectedCell, win, onCellClick, onCellSwap }: GridProps) {
   const cols = cells?.[0]?.length || 0
   const [activeCell, setActiveCell] = useState<ActiveCell | null>(null)
-  const mouseSensor = useSensor(MouseSensor, { activationConstraint: { distance: 3 } })
-  const touchSensor = useSensor(TouchSensor, { activationConstraint: { delay: 30, tolerance: 5 } })
+  const mouseSensor = useSensor(MouseSensor, { activationConstraint: { distance: 5 } })
+  const touchSensor = useSensor(TouchSensor, { activationConstraint: { distance: 10 } })
   const sensors = useSensors(mouseSensor, touchSensor)
 
   const gridStyle = {

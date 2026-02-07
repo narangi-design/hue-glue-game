@@ -2,6 +2,7 @@ import './styles/App.css'
 import './styles/Toggle.css'
 import sunIcon from './assets/sun.svg?raw'
 import moonIcon from './assets/moon.svg?raw'
+import logoImage from './assets/logo.svg?raw'
 import { useState, useEffect } from 'react'
 import * as Toggle from '@radix-ui/react-toggle'
 import * as ToggleGroup from '@radix-ui/react-toggle-group'
@@ -12,10 +13,10 @@ import { generateGrid, shuffleGrid } from './utils/color'
 import { saveGame, loadGame, compareGrids } from './utils/level'
 
 function App() {
-  const [currentGrid, setCurrentGrid] = useState<CellModel[][]>([])
+  const [currentGrid, setCurrentGrid] = useState<CellModel[][]>(() => generateGrid(8, 8))
   const [targetGrid, setTargetGrid] = useState<CellModel[][]>([])
   const [selectedCell, setSelectedCell] = useState<{ x: number; y: number } | null>(null)
-  const [win, setWin] = useState(false)
+  const [win, setWin] = useState(true)
   const [darkTheme, setDarkTheme] = useState(() => {
     const saved = localStorage.getItem('darkTheme')
     if (saved !== null) return saved === 'true'
@@ -28,6 +29,7 @@ function App() {
     if (saved) {
       setTargetGrid(saved.initialGridState)
       setCurrentGrid(saved.currentGridState)
+      setWin(false)
     }
   }, [])
 
@@ -70,7 +72,7 @@ function App() {
           return cell
         })
       )
-      if (targetGrid) {
+      if (targetGrid.length > 0) {
         saveGame(targetGrid, newCells)
         if (compareGrids(newCells, targetGrid)) {
           setWin(true)
@@ -109,7 +111,10 @@ function App() {
         </span>
       </Toggle.Root>
       <div className='app'>
-        <h1>Hue Glue</h1>
+        <h1>
+          <span className="logo" aria-hidden="true" dangerouslySetInnerHTML={{ __html: logoImage }} />
+          Hue Glue Game
+        </h1>
         <Grid
           cells={currentGrid}
           selectedCell={selectedCell}

@@ -1,20 +1,22 @@
-# Hue Glue Game
+# Hue Glue Game (React + TypeScript)
 
-**Hue Glue** Browser puzzle-game in which the player uses the mouse to interact with a grid in order to arrange the mixed-up cells by color. Recreate harmony in the color grid by hue.
+A learning project built with React and TypeScript.
+A color puzzle game where you rearrange shuffled cells on a grid to restore a smooth gradient. Swap cells by clicking or dragging. Corner cells are fixed anchors — sort the rest by hue. Progress is saved in localStorage.
 
----
+## Description
 
-## Run locally
+- Gradient generation with bilinear color interpolation
+- Drag-and-drop and tap-to-select cell swapping
+- Touch support for mobile devices
+- Grid sizes: 6x6, 8x8, 10x10, 12x12
+- Win detection against the target grid
+- Game state saved in localStorage
+- Dark/light theme with system preference support
 
-```bash
-git clone https://github.com/narangiraffe/hue-glue-game.git
-cd hue-glue-game
-npm install
-npm run dev
-```
+## Technical Details
 
-## Build
-```bash
-npm run build
-```
-Creates a production-ready version in the dist/ folder.
+- **Vite** + **React 19** + **TypeScript**
+- **@dnd-kit/core** for drag-and-drop with mouse and touch sensors
+- **@radix-ui/react-toggle** and **@radix-ui/react-toggle-group** for accessible toggle components
+- **@badcafe/jsonizer** for serializing class instances (Color, CellModel) to localStorage
+- Color math: RGB distance, brightness, linear and bilinear interpolation, hue shifting

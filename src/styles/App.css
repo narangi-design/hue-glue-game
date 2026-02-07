@@ -24,6 +24,21 @@
   width: auto;
 }
 
+.repo-link {
+  position: fixed;
+  bottom: 1rem;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 0.875rem;
+  color: var(--color-text-secondary, #888);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.repo-link:hover {
+  color: var(--color-text-primary, #fff);
+}
+
 @media (max-width: 480px) {
   .app {
     padding: 0.5rem 0.5rem;

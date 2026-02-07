@@ -137,6 +137,9 @@ function App() {
           <Button onClick={handleNewGame}>New Game</Button>
         </div>
       </div>
+      <a className="repo-link" href="https://github.com/narangiraffe/hue-glue-game" target="_blank" rel="noopener noreferrer">
+        GitHub
+      </a>
     </>
   )
 }

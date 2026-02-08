@@ -1,5 +1,5 @@
 import CellIndex from "./cell-index"
-import { CellModel } from "./cell"
+import CellModel from "./cell-model"
 
 export default class Grid {
     rows: number

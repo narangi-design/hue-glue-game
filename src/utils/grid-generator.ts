@@ -1,10 +1,8 @@
+import { MIN_COLOR_DISTANCE, MIN_BRIGHTNESS_DIFFERENCE } from "./constants"
+
 import Color from "./color-class"
 import Grid from "./grid"
-import { CellModel } from "./cell"
-import {
-    MIN_COLOR_DISTANCE,
-    MIN_BRIGHTNESS_DIFFERENCE
-} from "./constants"
+import CellModel from "./cell-model"
 
 function makeListOfAnchorColors(anchorCount: number, minDistance: number, minBrightnessDiff: number): Color[] {
     const areColorsDifferent = (colors: Color[]): boolean => {
@@ -38,7 +36,6 @@ function makeListOfAnchorColors(anchorCount: number, minDistance: number, minBri
         if (areColorsDifferent(colors)) {
             return colors
         }
-
         attempts++
     }
 
@@ -65,7 +62,6 @@ function colorRest(grid: CellModel[][], anchorColors: Color[]): CellModel[][] {
     return grid
 }
 
-//generate a grid of given dimensions with colored anchors and interpolated colors in between
 export function generateGrid(rows: number, cols: number): CellModel[][] {
     if (!Number.isInteger(rows) || !Number.isInteger(cols) || rows <= 0 || cols <= 0) {
         throw new Error(`generateGrid: invalid dimensions rows=${rows}, cols=${cols}`)
@@ -80,11 +76,9 @@ export function generateGrid(rows: number, cols: number): CellModel[][] {
         grid.cells[a.y][a.x].color = anchorColors[i]
     }
 
-    //fill in the rest of the grid
     return colorRest(grid.cells, anchorColors)
 }
 
-//shuffle all cells except anchors
 export function shuffleGrid(grid: CellModel[][]): CellModel[][] {
     const rows = grid.length
     const cols = grid[0].length

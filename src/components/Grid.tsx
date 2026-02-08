@@ -4,7 +4,7 @@ import {
   MouseSensor, TouchSensor, useSensor, useSensors
 } from "@dnd-kit/core"
 import Cell from "./Cell"
-import { CellModel } from "../utils/cell"
+import CellModel from "../utils/cell-model"
 import Color from "../utils/color-class"
 import "../styles/Grid.css"
 

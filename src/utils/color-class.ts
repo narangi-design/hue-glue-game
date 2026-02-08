@@ -1,8 +1,5 @@
+import { COLOR, BRIGHTNESS } from "./constants"
 import { lerp as lerpMath, getRandomValue, clamp } from "./math"
-import {
-    COLOR,
-    BRIGHTNESS,
-} from "./constants"
 
 export default class Color {
     r: number

@@ -1,6 +1,6 @@
 import Color from './color-class'
 
-export class CellModel {
+export default class CellModel {
     isAnchor: boolean
     private _color: Color = new Color(0, 0, 0)
 

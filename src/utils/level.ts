@@ -1,5 +1,6 @@
 import { Jsonizer } from "@badcafe/jsonizer"
-import { CellModel } from "./cell"
+
+import CellModel from "./cell-model"
 import Color from "./color-class"
 
 const STORAGE_KEY = "hue-glue-game"

@@ -44,7 +44,6 @@
   transform: scale(1.2);
 }
 
-/* Labels below bullets */
 .toggle-item::after {
   content: attr(data-label);
   position: absolute;

@@ -1,52 +1,37 @@
-import { MIN_COLOR_DISTANCE, MIN_BRIGHTNESS_DIFFERENCE } from "./constants"
+import { ANCHOR_LIGHTNESS_LIGHT, ANCHOR_LIGHTNESS_DARK, ANCHOR_CHROMA } from "./constants"
+import { oklchToColor } from "./oklch"
 
 import Color from "./color-class"
 import Grid from "./grid"
 import CellModel from "./cell-model"
 
-function makeListOfAnchorColors(anchorCount: number, minDistance: number, minBrightnessDiff: number): Color[] {
-    const areColorsDifferent = (colors: Color[]): boolean => {
-        for (let i = 0; i < colors.length; i++) {
-            for (let j = i + 1; j < colors.length; j++) {
-                const distance = Color.distance(colors[i], colors[j])
-                const brightnessDiff = Color.brightnessDifference(colors[i], colors[j])
-                if (distance < minDistance || brightnessDiff < minBrightnessDiff) {
-                    return false
-                }
-            }
-        }
-        return true
-    }
+function randomInRange(min: number, max: number): number {
+    return min + Math.random() * (max - min)
+}
 
-    let colors: Color[] = []
-    let attempts = 0
+// Anchors are ordered: TL(0), TR(1), BL(2), BR(3)
+// Diagonals get opposite lightness so gradients have depth in both directions
+// Hue spacing 20-75° keeps corners in the same color neighborhood
+function makeListOfAnchorColors(count: number): Color[] {
+    const baseHue = Math.random() * 360
+    const hueSpacing = randomInRange(20, 75)
 
-    while (attempts < 100) {
-        const base = Color.random()
-        colors = [base]
+    // Randomly pick which diagonal is light vs dark
+    const lightDiag = Math.random() < 0.5 ? [0, 3] : [1, 2]
 
-        const spacing = 360 / anchorCount
-
-        for (let i = 1; i < anchorCount; i++) {
-            colors.push(Math.random() < 0.5
-                ? Color.invertBrightness(base)
-                : Color.shiftHue(base, spacing * i))
-        }
-
-        if (areColorsDifferent(colors)) {
-            return colors
-        }
-        attempts++
-    }
-
-    return colors
+    return Array.from({ length: count }, (_, i) => {
+        const h = (baseHue + hueSpacing * i) % 360
+        const band = lightDiag.includes(i) ? ANCHOR_LIGHTNESS_LIGHT : ANCHOR_LIGHTNESS_DARK
+        const l = randomInRange(band.MIN, band.MAX)
+        const c = randomInRange(ANCHOR_CHROMA.MIN, ANCHOR_CHROMA.MAX)
+        return oklchToColor(l, c, h)
+    })
 }
 
 function colorRest(grid: CellModel[][], anchorColors: Color[]): CellModel[][] {
     const rows = grid.length
     const cols = grid[0].length
 
-    // FIXME
     const [topleft, topright, bottomleft, bottomright] = anchorColors
 
     for (let i = 0; i < rows; i++) {
@@ -69,8 +54,7 @@ export function generateGrid(rows: number, cols: number): CellModel[][] {
 
     const grid = new Grid(rows, cols)
 
-    // FIXME guarantee elementwise correspondence with grid.anchors
-    let anchorColors = makeListOfAnchorColors(grid.anchors.length, MIN_COLOR_DISTANCE, MIN_BRIGHTNESS_DIFFERENCE)
+    let anchorColors = makeListOfAnchorColors(grid.anchors.length)
 
     for (const [i, a] of grid.anchors.entries()) {
         grid.cells[a.y][a.x].color = anchorColors[i]

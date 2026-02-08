@@ -1,14 +1,4 @@
-// Color generation constants
-export const COLOR = {
-    MIN: 10,
-    MAX: 240
-}
-
-export const BRIGHTNESS = {
-    THRESHOLD: 127,
-    MIN: 50,
-    MAX: 200
-}
-
-export const MIN_COLOR_DISTANCE = 100
-export const MIN_BRIGHTNESS_DIFFERENCE = 20
+// OKLCH ranges for anchor color generation
+export const ANCHOR_LIGHTNESS_LIGHT = { MIN: 0.65, MAX: 0.80 }
+export const ANCHOR_LIGHTNESS_DARK = { MIN: 0.35, MAX: 0.50 }
+export const ANCHOR_CHROMA = { MIN: 0.08, MAX: 0.15 }

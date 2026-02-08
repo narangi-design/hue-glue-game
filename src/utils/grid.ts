@@ -5,33 +5,32 @@ export default class Grid {
     rows: number
     cols: number
     cells: CellModel[][]
-    anchors: CellIndex[]
+    corners: CellIndex[]
 
     constructor(rows: number, cols: number) {
         this.rows = rows
         this.cols = cols
-        this.anchors = Grid.makeAnchorIndexes(rows, cols)
-        this.cells = Grid.makeGrid(rows, cols, this.anchors)
+        this.corners = Grid.makeCornerIndexes(rows, cols)
+        this.cells = Grid.makeGrid(rows, cols)
     }
 
     getCell(cellIndex: { row: number; col: number }) {
         return this.cells[cellIndex.row][cellIndex.col]
     }
 
-    static makeGrid(rows: number, cols: number, anchors: CellIndex[]): CellModel[][] {
+    static makeGrid(rows: number, cols: number): CellModel[][] {
         const grid: CellModel[][] = []
         for (let row = 0; row < rows; row++) {
             const cellRow: CellModel[] = []
             for (let col = 0; col < cols; col++) {
-                const isAnchorCell = anchors.some(anchor => anchor.y === row && anchor.x === col)
-                cellRow.push(new CellModel(isAnchorCell))
+                cellRow.push(new CellModel())
             }
             grid.push(cellRow)
         }
         return grid
     }
 
-    static makeAnchorIndexes(rows: number, cols: number): CellIndex[] {
+    static makeCornerIndexes(rows: number, cols: number): CellIndex[] {
         return [
             new CellIndex(0, 0),
             new CellIndex(0, cols - 1),

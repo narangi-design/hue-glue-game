@@ -1,46 +1,18 @@
-import { ANCHOR_LIGHTNESS_LIGHT, ANCHOR_LIGHTNESS_DARK, ANCHOR_CHROMA } from "./constants"
-import { oklchToColor } from "./oklch"
-
 import Color from "./color-class"
 import Grid from "./grid"
 import CellModel from "./cell-model"
 
-function randomInRange(min: number, max: number): number {
-    return min + Math.random() * (max - min)
-}
-
-// Anchors are ordered: TL(0), TR(1), BL(2), BR(3)
-// Diagonals get opposite lightness so gradients have depth in both directions
-// Hue spacing 20-75° keeps corners in the same color neighborhood
-function makeListOfAnchorColors(count: number): Color[] {
-    const baseHue = Math.random() * 360
-    const hueSpacing = randomInRange(20, 75)
-
-    // Randomly pick which diagonal is light vs dark
-    const lightDiag = Math.random() < 0.5 ? [0, 3] : [1, 2]
-
-    return Array.from({ length: count }, (_, i) => {
-        const h = (baseHue + hueSpacing * i) % 360
-        const band = lightDiag.includes(i) ? ANCHOR_LIGHTNESS_LIGHT : ANCHOR_LIGHTNESS_DARK
-        const l = randomInRange(band.MIN, band.MAX)
-        const c = randomInRange(ANCHOR_CHROMA.MIN, ANCHOR_CHROMA.MAX)
-        return oklchToColor(l, c, h)
-    })
-}
-
-function colorRest(grid: CellModel[][], anchorColors: Color[]): CellModel[][] {
+function colorAll(grid: CellModel[][], cornerColors: Color[]): CellModel[][] {
     const rows = grid.length
     const cols = grid[0].length
 
-    const [topleft, topright, bottomleft, bottomright] = anchorColors
+    const [topleft, topright, bottomleft, bottomright] = cornerColors
 
     for (let i = 0; i < rows; i++) {
         for (let j = 0; j < cols; j++) {
-            if (!grid[i][j].isAnchor) {
-                const tx = j / (cols - 1)
-                const ty = i / (rows - 1)
-                grid[i][j].color = Color.bilerp(topleft, topright, bottomleft, bottomright, tx, ty)
-            }
+            const tx = j / (cols - 1)
+            const ty = i / (rows - 1)
+            grid[i][j].color = Color.bilerp(topleft, topright, bottomleft, bottomright, tx, ty)
         }
     }
 
@@ -54,13 +26,14 @@ export function generateGrid(rows: number, cols: number): CellModel[][] {
 
     const grid = new Grid(rows, cols)
 
-    let anchorColors = makeListOfAnchorColors(grid.anchors.length)
+    const cornerColors = Color.generateCornerColors(grid.corners.length)
+    colorAll(grid.cells, cornerColors)
 
-    for (const [i, a] of grid.anchors.entries()) {
-        grid.cells[a.y][a.x].color = anchorColors[i]
+    for (const corner of grid.corners) {
+        grid.cells[corner.y][corner.x].isAnchor = true
     }
 
-    return colorRest(grid.cells, anchorColors)
+    return grid.cells
 }
 
 export function shuffleGrid(grid: CellModel[][]): CellModel[][] {

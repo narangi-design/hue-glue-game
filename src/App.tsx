@@ -1,15 +1,12 @@
 import './styles/App.css'
-import './styles/Toggle.css'
-import sunIcon from './assets/sun.svg?raw'
-import moonIcon from './assets/moon.svg?raw'
 import logoImage from './assets/logo.svg?raw'
 import { useState, useEffect } from 'react'
-import * as Toggle from '@radix-ui/react-toggle'
-import * as ToggleGroup from '@radix-ui/react-toggle-group'
 import Grid from './components/Grid'
 import Button from './components/Button'
+import ThemeToggle from './components/ThemeToggle'
+import SizeSelector from './components/SizeSelector'
 import { CellModel } from './utils/cell'
-import { generateGrid, shuffleGrid } from './utils/color'
+import { generateGrid, shuffleGrid } from './utils/grid-generator'
 import { saveGame, loadGame, compareGrids } from './utils/level'
 
 function App() {
@@ -101,15 +98,7 @@ function App() {
 
   return (
     <>
-      <Toggle.Root
-        className='theme-toggle'
-        pressed={darkTheme}
-        onPressedChange={setDarkTheme}
-      >
-        <span className='theme-knob'>
-          <span className='theme-icon' dangerouslySetInnerHTML={{ __html: darkTheme ? moonIcon : sunIcon }} />
-        </span>
-      </Toggle.Root>
+      <ThemeToggle darkTheme={darkTheme} onToggle={setDarkTheme} />
       <div className='app'>
         <h1>
           <span className="logo" aria-hidden="true" dangerouslySetInnerHTML={{ __html: logoImage }} />
@@ -123,17 +112,7 @@ function App() {
           onCellSwap={swapCells}
         />
         <div className='controls'>
-          <ToggleGroup.Root
-            className='toggle-group'
-            type='single'
-            value={gridSize}
-            onValueChange={(value) => value && setGridSize(value)}
-          >
-            <ToggleGroup.Item className='toggle-item' value='6' data-label='6x6' />
-            <ToggleGroup.Item className='toggle-item' value='8' data-label='8x8' />
-            <ToggleGroup.Item className='toggle-item' value='10' data-label='10x10' />
-            <ToggleGroup.Item className='toggle-item' value='12' data-label='12x12' />
-          </ToggleGroup.Root>
+          <SizeSelector value={gridSize} onChange={setGridSize} />
           <Button onClick={handleNewGame}>New Game</Button>
         </div>
       </div>

@@ -5,7 +5,7 @@ import {
 } from "@dnd-kit/core"
 import Cell from "./Cell"
 import { CellModel } from "../utils/cell"
-import Color from "../utils/color"
+import Color from "../utils/color-class"
 import "../styles/Grid.css"
 
 interface GridProps {

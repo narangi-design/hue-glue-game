@@ -1,4 +1,4 @@
-import Color from './color'
+import Color from './color-class'
 
 export class CellModel {
     isAnchor: boolean

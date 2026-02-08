@@ -1,5 +1,5 @@
 import { useDraggable, useDroppable } from "@dnd-kit/core"
-import Color from "../utils/color"
+import Color from "../utils/color-class"
 
 interface CellProps {
   color: Color

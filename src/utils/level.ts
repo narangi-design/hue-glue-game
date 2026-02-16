@@ -17,7 +17,7 @@ const cellReviver = {
         return cell
     },
     _color: {
-        '.': ({ r, g, b }: { r: number; g: number; b: number }) => new Color(r, g, b)
+        '.': ({ l, a, b }: { l: number; a: number; b: number }) => new Color(l, a, b)
     }
 }
 
@@ -52,9 +52,9 @@ export function compareGrids(cells: CellModel[][], levelData: CellModel[][]): bo
             const cell = cells[y]?.[x]
             if (!cell?.color || !target?.color) return false
 
-            if (Math.round(cell.color.r) !== Math.round(target.color.r)
-                || Math.round(cell.color.g) !== Math.round(target.color.g)
-                || Math.round(cell.color.b) !== Math.round(target.color.b)
+            if (cell.color.l !== target.color.l
+                || cell.color.a !== target.color.a
+                || cell.color.b !== target.color.b
             ) {
                 return false
             }

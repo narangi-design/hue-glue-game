@@ -40,7 +40,7 @@ function Cell({ color, isAnchor, isSelected, isDragging, col, row, onClick }: Ce
         setDroppableRef(node)
       }}
       className={className}
-      style={{ backgroundColor: color.rgb }}
+      style={{ backgroundColor: color.css }}
       onClick={isAnchor ? undefined : onClick}
       {...(isAnchor ? {} : listeners)}
       {...(isAnchor ? {} : attributes)}

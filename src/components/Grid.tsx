@@ -69,7 +69,7 @@ function Grid({ cells, selectedCell, win, onCellClick, onCellSwap }: GridProps) 
       </div>
       <DragOverlay dropAnimation={null}>
         {activeCell ? (
-          <div className="drag-overlay" style={{ backgroundColor: activeCell.color.rgb }} />
+          <div className="drag-overlay" style={{ backgroundColor: activeCell.color.css }} />
         ) : null}
       </DragOverlay>
     </DndContext>

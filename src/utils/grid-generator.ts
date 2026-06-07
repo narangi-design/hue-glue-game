@@ -12,8 +12,8 @@ export function generateGrid(rows: number, cols: number): CellModel[][] {
 
     for (let row = 0; row < rows; row++) {
         for (let col = 0; col < cols; col++) {
-            const tx = col / (cols - 1)
-            const ty = row / (rows - 1)
+            const tx = cols > 1 ? col / (cols - 1) : 0
+            const ty = rows > 1 ? row / (rows - 1) : 0
             grid.cells[row][col].color = Color.bilerp(topleft, topright, bottomleft, bottomright, tx, ty)
         }
     }

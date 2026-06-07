@@ -1,10 +1,10 @@
 export default class CellIndex {
-    x: number
-    y: number
+    row: number
+    col: number
 
     constructor(row: number, col: number) {
-        this.x = col
-        this.y = row
+        this.row = row
+        this.col = col
     }
 
 }

@@ -8,15 +8,19 @@ export default function useGame() {
   const [currentGrid, setCurrentGrid] = useState<CellModel[][]>(() => generateGrid(8, 8))
   const [targetGrid, setTargetGrid] = useState<CellModel[][]>([])
   const [selectedCell, setSelectedCell] = useState<{ x: number; y: number } | null>(null)
-  const [win, setWin] = useState(true)
-  const [gridSize, setGridSize] = useState('8')
+  const [gameState, setGameState] = useState<'idle' | 'playing' | 'won'>('idle')
+  const [gridSize, setGridSize] = useState(() => localStorage.getItem('hue-glue-grid-size') ?? '8')
+  const rememberGridSize = (size: string) => {
+    setGridSize(size)
+    localStorage.setItem('hue-glue-grid-size', size)
+  }
 
   useEffect(() => {
     const saved = loadGame()
     if (saved) {
       setTargetGrid(saved.initialGridState)
       setCurrentGrid(saved.currentGridState)
-      setWin(false)
+      setGameState('playing')
     }
   }, [])
 
@@ -28,11 +32,11 @@ export default function useGame() {
     setCurrentGrid(shuffled)
     saveGame(grid, shuffled)
     setSelectedCell(null)
-    setWin(false)
+    setGameState('playing')
   }
 
   const swapCells = (fromCol: number, fromRow: number, toCol: number, toRow: number) => {
-    if (win) return
+    if (gameState !== 'playing') return
 
     setCurrentGrid(prev => {
       const colorA = prev[fromRow][fromCol].color
@@ -56,7 +60,7 @@ export default function useGame() {
       if (targetGrid.length > 0) {
         saveGame(targetGrid, newCells)
         if (compareGrids(newCells, targetGrid)) {
-          setWin(true)
+          setGameState('won')
         }
       }
       return newCells
@@ -64,7 +68,7 @@ export default function useGame() {
   }
 
   const handleCellClick = (col: number, row: number) => {
-    if (win) return
+    if (gameState !== 'playing') return
 
     if (!selectedCell) {
       setSelectedCell({ x: col, y: row })
@@ -83,11 +87,11 @@ export default function useGame() {
   return {
     handleNewGame,
     gridSize,
-    setGridSize,
+    setGridSize: rememberGridSize,
     currentGrid,
     selectedCell,
     handleCellClick,
     swapCells,
-    win
+    gameState
   }
 }

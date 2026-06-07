@@ -3,18 +3,6 @@ import { CORNER_LIGHTNESS_LIGHT, CORNER_LIGHTNESS_DARK, CORNER_CHROMA } from "./
 
 type Range = { MIN: number; MAX: number }
 
-type Oklch = { lightness: number; chroma: number; hueAngle: number }
-type Oklab = { lightness: number; aChannel: number; bChannel: number }
-
-function oklchToOklab(oklchColor: Oklch): Oklab {
-    const hueRadians = oklchColor.hueAngle * Math.PI / 180
-    return {
-        lightness: oklchColor.lightness,
-        aChannel: oklchColor.chroma * Math.cos(hueRadians),
-        bChannel: oklchColor.chroma * Math.sin(hueRadians)
-    }
-}
-
 export default class Color {
     l: number
     a: number
@@ -30,8 +18,13 @@ export default class Color {
         return `oklab(${this.l} ${this.a} ${this.b})`
     }
 
+    private static oklchToOklab(lightness: number, chroma: number, hueAngle: number) {
+        const hueRadians = hueAngle * Math.PI / 180
+        return { lightness, aChannel: chroma * Math.cos(hueRadians), bChannel: chroma * Math.sin(hueRadians) }
+    }
+
     static fromOklch(lightness: number, chroma: number, hueAngle: number): Color {
-        const lab = oklchToOklab({ lightness, chroma, hueAngle })
+        const lab = Color.oklchToOklab(lightness, chroma, hueAngle)
         return new Color(lab.lightness, lab.aChannel, lab.bChannel)
     }
 
@@ -56,6 +49,10 @@ export default class Color {
             const hueAngle = (baseHue + hueSpacing * i) % 360
             return Color.random(band, hueAngle)
         })
+    }
+
+    equals(other: Color): boolean {
+        return this.l === other.l && this.a === other.a && this.b === other.b
     }
 
     static lerp(colorL: Color, colorR: Color, interpolant: number): Color {

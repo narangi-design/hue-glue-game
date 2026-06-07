@@ -11,7 +11,7 @@ import SizeSelector from './components/SizeSelector'
 
 function App() {
   const { darkTheme, setDarkTheme } = useTheme()
-  const { handleNewGame, gridSize, setGridSize, currentGrid, selectedCell, handleCellClick, swapCells, win } = useGame()
+  const { handleNewGame, gridSize, setGridSize, currentGrid, selectedCell, handleCellClick, swapCells, gameState } = useGame()
 
   return (
     <>
@@ -26,7 +26,7 @@ function App() {
           selectedCell={selectedCell}
           onCellClick={handleCellClick}
           onCellSwap={swapCells}
-          win={win}
+          win={gameState === 'won'}
         />
         <div className='controls'>
           <SizeSelector value={gridSize} onChange={setGridSize} />

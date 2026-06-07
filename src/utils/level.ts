@@ -11,12 +11,12 @@ export interface SavedGame {
 }
 
 const cellReviver = {
-    '.': ({ isAnchor, _color }: { isAnchor: boolean; _color: Color }) => {
+    '.': ({ isAnchor, color }: { isAnchor: boolean; color: Color }) => {
         const cell = new CellModel(isAnchor)
-        cell.color = _color
+        cell.color = color
         return cell
     },
-    _color: {
+    color: {
         '.': ({ l, a, b }: { l: number; a: number; b: number }) => new Color(l, a, b)
     }
 }
@@ -50,14 +50,8 @@ export function compareGrids(cells: CellModel[][], levelData: CellModel[][]): bo
         for (let x = 0; x < levelData[y].length; x++) {
             const target = levelData[y][x]
             const cell = cells[y]?.[x]
-            if (!cell?.color || !target?.color) return false
-
-            if (cell.color.l !== target.color.l
-                || cell.color.a !== target.color.a
-                || cell.color.b !== target.color.b
-            ) {
-                return false
-            }
+            if (!cell || !target) return false
+            if (!cell.color.equals(target.color)) return false
         }
     }
     return true

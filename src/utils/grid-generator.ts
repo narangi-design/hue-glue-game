@@ -2,35 +2,24 @@ import Color from "./color-class"
 import Grid from "./grid"
 import CellModel from "./cell-model"
 
-function colorAll(grid: CellModel[][], cornerColors: Color[]): CellModel[][] {
-    const rows = grid.length
-    const cols = grid[0].length
-
-    const [topleft, topright, bottomleft, bottomright] = cornerColors
-
-    for (let i = 0; i < rows; i++) {
-        for (let j = 0; j < cols; j++) {
-            const tx = j / (cols - 1)
-            const ty = i / (rows - 1)
-            grid[i][j].color = Color.bilerp(topleft, topright, bottomleft, bottomright, tx, ty)
-        }
-    }
-
-    return grid
-}
-
 export function generateGrid(rows: number, cols: number): CellModel[][] {
     if (!Number.isInteger(rows) || !Number.isInteger(cols) || rows <= 0 || cols <= 0) {
         throw new Error(`generateGrid: invalid dimensions rows=${rows}, cols=${cols}`)
     }
 
     const grid = new Grid(rows, cols)
+    const [topleft, topright, bottomleft, bottomright] = Color.generateCornerColors(grid.corners.length)
 
-    const cornerColors = Color.generateCornerColors(grid.corners.length)
-    colorAll(grid.cells, cornerColors)
+    for (let row = 0; row < rows; row++) {
+        for (let col = 0; col < cols; col++) {
+            const tx = col / (cols - 1)
+            const ty = row / (rows - 1)
+            grid.cells[row][col].color = Color.bilerp(topleft, topright, bottomleft, bottomright, tx, ty)
+        }
+    }
 
     for (const corner of grid.corners) {
-        grid.cells[corner.y][corner.x].isAnchor = true
+        grid.cells[corner.row][corner.col].isAnchor = true
     }
 
     return grid.cells
@@ -41,19 +30,17 @@ export function shuffleGrid(grid: CellModel[][]): CellModel[][] {
     const cols = grid[0].length
 
     const colors: Color[] = []
-    for (let i = 0; i < rows; i++) {
-        for (let j = 0; j < cols; j++) {
-            if (!grid[i][j].isAnchor && grid[i][j].color) {
-                colors.push(grid[i][j].color)
+    for (let row = 0; row < rows; row++) {
+        for (let col = 0; col < cols; col++) {
+            if (!grid[row][col].isAnchor && grid[row][col].color) {
+                colors.push(grid[row][col].color)
             }
         }
     }
 
     for (let i = colors.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1))
-        const temp = colors[i]
-        colors[i] = colors[j]
-        colors[j] = temp
+        const j = Math.floor(Math.random() * (i + 1));
+        [colors[i], colors[j]] = [colors[j], colors[i]]
     }
 
     let colorIndex = 0

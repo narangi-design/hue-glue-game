@@ -19,15 +19,9 @@ export default class Grid {
     }
 
     static makeGrid(rows: number, cols: number): CellModel[][] {
-        const grid: CellModel[][] = []
-        for (let row = 0; row < rows; row++) {
-            const cellRow: CellModel[] = []
-            for (let col = 0; col < cols; col++) {
-                cellRow.push(new CellModel())
-            }
-            grid.push(cellRow)
-        }
-        return grid
+        return Array.from({ length: rows }, () =>
+            Array.from({ length: cols }, () => new CellModel())
+        )
     }
 
     static makeCornerIndexes(rows: number, cols: number): CellIndex[] {
